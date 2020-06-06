@@ -15,7 +15,8 @@ def create_tables(app):
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     if not database_exists(engine.url):
         create_database(engine.url)
-    # db.metadata.create_all(engine)
+        db.metadata.create_all(engine)
+        db.session.commit()
     return engine
 
 
