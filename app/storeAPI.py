@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models import db, Store
 import uuid
 import bcrypt
+import helper_functions
 
 store_api = Blueprint('store_api', __name__)
 
@@ -42,7 +43,7 @@ def get_one_store(public_id):
     if not store:
         return jsonify({'message': 'No store found'})
     else:
-        store_data = allocate_data(store)
+        store_data = helper_functions.allocate_data(store)
         return jsonify({'store': store_data})
 
 
@@ -51,7 +52,7 @@ def get_one_store(public_id):
 def get_all_stores():
 
     stores = Store.query.all()
-    return combine_results(stores)
+    return helper_functions.combine_results(stores)
 
 
 @store_api.route('/store/keyword/<keyword>', methods=['GET'])
@@ -59,7 +60,7 @@ def get_all_stores():
 def get_specified_stores(keyword):
 
     stores = Store.query.filter(Store.name.like("%" + keyword + "%"))
-    return combine_results(stores)
+    return jsonify({'stores': helper_functions.combine_results(stores)})
 
 
 @store_api.route('/store/<public_id>', methods=['DELETE'])
@@ -74,23 +75,4 @@ def delete_store(public_id):
         return jsonify({'message': 'store deleted'})
 
 
-def combine_results(stores):
-    output = []
-    for store in stores:
-        store_data = allocate_data(store)
-        output.append(store_data)
 
-    return jsonify({'stores': output})
-
-
-def allocate_data(store):
-    store_data = {'public_id': store.public_id,
-                  'username': store.username,
-                  'name': store.name,
-                  'addressLine1': store.addressLine1,
-                  'addressLine2': store.addressLine2,
-                  'city': store.city,
-                  'district': store.district,
-                  'country': store.country
-                  }
-    return store_data
