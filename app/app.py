@@ -2,14 +2,12 @@ from flask import Flask
 from storeAPI import store_api
 import models
 import os
-from mysql import connector
 
 app = Flask(__name__)
 
-
-
 db_user = os.environ.get('DB_USER')
 db_pass = os.environ.get('DB_PASS')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'ThisIsSecretKey'
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://' + db_user + ':' + db_pass + '@localhost/store_test_db?auth_plugin=mysql_native_password'
@@ -26,4 +24,4 @@ def hello():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True)
