@@ -7,6 +7,7 @@ store_api = Blueprint('store_api', __name__)
 
 
 @store_api.route("/store", methods=['POST'])
+@store_api.route("/store/", methods=['POST'])
 def create_store():
 
     data = request.get_json()
@@ -34,44 +35,35 @@ def create_store():
     return jsonify({'message': 'New  Store created'})
 
 
-@store_api.route('/store/<public_id>', methods=['GET'])
+@store_api.route('/store/id/<public_id>', methods=['GET'])
+@store_api.route('/store/id/<public_id>/', methods=['GET'])
 def get_one_store(public_id):
     store = Store.query.filter_by(public_id=public_id).first()
     if not store:
         return jsonify({'message': 'No store found'})
     else:
-        store_data = {'public_id': store.public_id,
-                      'username': store.username,
-                      'name': store.name,
-                      'addressLine1': store.addressLine1,
-                      'addressLine2': store.addressLine2,
-                      'city': store.city,
-                      'district': store.district,
-                      'country': store.country
-                      }
+        store_data = allocate_data(store)
         return jsonify({'store': store_data})
 
+
 @store_api.route('/store', methods=['GET'])
+@store_api.route('/store/', methods=['GET'])
 def get_all_stores():
 
     stores = Store.query.all()
-    output=[]
-    for store in stores:
-        store_data = {'public_id': store.public_id,
-                      'username': store.username,
-                      'name': store.name,
-                      'addressLine1': store.addressLine1,
-                      'addressLine2': store.addressLine2,
-                      'city': store.city,
-                      'district': store.district,
-                      'country': store.country
-        }
-        output.append(store_data)
+    return combine_results(stores)
 
-    return jsonify({'stores': output})
+
+@store_api.route('/store/keyword/<keyword>', methods=['GET'])
+@store_api.route('/store/keyword/<keyword>/', methods=['GET'])
+def get_specified_stores(keyword):
+
+    stores = Store.query.filter(Store.name.like("%" + keyword + "%"))
+    return combine_results(stores)
 
 
 @store_api.route('/store/<public_id>', methods=['DELETE'])
+@store_api.route('/store/<public_id>/', methods=['DELETE'])
 def delete_store(public_id):
     store = Store.query.filter_by(public_id=public_id).first()
     if not store:
@@ -82,6 +74,23 @@ def delete_store(public_id):
         return jsonify({'message': 'store deleted'})
 
 
-# @app.route('/')
-# def hello_world():
-#     return 'Hello World!'
+def combine_results(stores):
+    output = []
+    for store in stores:
+        store_data = allocate_data(store)
+        output.append(store_data)
+
+    return jsonify({'stores': output})
+
+
+def allocate_data(store):
+    store_data = {'public_id': store.public_id,
+                  'username': store.username,
+                  'name': store.name,
+                  'addressLine1': store.addressLine1,
+                  'addressLine2': store.addressLine2,
+                  'city': store.city,
+                  'district': store.district,
+                  'country': store.country
+                  }
+    return store_data
