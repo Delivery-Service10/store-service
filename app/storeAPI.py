@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from models import db, Store
-import uuid
 import bcrypt
 import helper_functions
 
@@ -20,17 +19,7 @@ def create_store():
         return jsonify({'message': 'Store name already exists'})
 
     hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
-    new_store = Store(public_id=str(uuid.uuid4()),
-                      name=data['name'],
-                      chain_id=data['chain-id'],
-                      username=data['username'],
-                      password=hashed_password,
-                      addressLine1=data['addressLine1'],
-                      addressLine2=data['addressLine2'],
-                      city=data['city'],
-                      district=data['district'],
-                      country=data['country']
-                      )
+    new_store = helper_functions.populate_store(data, hashed_password)
     db.session.add(new_store)
     db.session.commit()
     return jsonify({'message': 'New  Store created'})
@@ -73,6 +62,3 @@ def delete_store(public_id):
         db.session.delete(store)
         db.session.commit()
         return jsonify({'message': 'store deleted'})
-
-
-
