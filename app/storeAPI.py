@@ -41,7 +41,7 @@ def get_one_store(public_id):
 def get_all_stores():
 
     stores = Store.query.all()
-    return helper_functions.combine_results(stores)
+    return jsonify({'stores': helper_functions.combine_results(stores) })
 
 
 @store_api.route('/store/keyword/<keyword>', methods=['GET'])
